@@ -15,7 +15,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 RAW, VO, BUILD = ROOT / "raw", ROOT / "vo", ROOT / "build"
 OUT = ROOT / "socklock-variants-demo.mp4"
-FONT = "/usr/share/fonts/truetype/noto/NotoSans-SemiBold.ttf"
 LEAD, TAIL, FADE = 0.35, 0.45, 0.25
 
 # planned seconds per scene when there is no voice-over yet (docs/demo/plan.md)
@@ -69,9 +68,6 @@ def render(n: int, m: dict) -> Path:
     if total < target:
         vf += f",tpad=stop_mode=clone:stop_duration={target - total:.3f}"
     vf += f",trim=0:{target:.3f},setpts=PTS-STARTPTS"
-    if n == 7:
-        vf += (f",drawtext=fontfile={FONT}:text='Генерація 20 варіантів\: {elastic:.0f} с, тут прискорено ×{speed_el:.0f}'"
-               ":fontsize=34:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=22:x=(w-tw)/2:y=60")
     vf += f",fade=t=in:st=0:d={FADE},fade=t=out:st={target - FADE:.3f}:d={FADE}[v]"
 
     cmd = ["ffmpeg", "-loglevel", "error", "-y", "-i", str(src)]
