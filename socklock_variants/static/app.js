@@ -93,8 +93,6 @@ function tags(v) {
   const a = el("span", "tag", ANGLE[v.angle] || v.angle.replace(/_/g, " "));
   a.style.background = `var(--a-${v.angle}, var(--hair))`;
   box.append(a);
-  const len = v.seconds != null ? `${v.words} слів, ${String(v.seconds).replace(".", ",")} с` : `${v.words} слів`;
-  box.append(el("span", "tag", len));
   if (v.adjacent) box.append(el("span", "tag", "змінена сусідня фраза"));
   v.issues.forEach((i) => {
     const label = i.startsWith("risky:") ? `ризикова обіцянка: ${i.slice(6)}` : ISSUE[i] || i;
@@ -201,7 +199,7 @@ function aiBubble(v, lead) {
   if (lead) b.append(el("span", "meta", lead));
   b.append(el("div", null, `“${v.text}”`));
   const ok = v.issues.length ? `позначки: ${v.issues.join(", ")}` : "перевірки пройдено";
-  b.append(el("span", "meta", `${v.name}, ${v.words} слів, ${ok}`));
+  b.append(el("span", "meta", `${v.name}, ${ok}`));
   return b;
 }
 
