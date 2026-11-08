@@ -40,3 +40,16 @@ def test_cli_passes_schema_and_returns_structured_output(monkeypatch):
     assert json.loads(text) == {"variants": []}
     i = seen["cmd"].index("--json-schema")
     assert json.loads(seen["cmd"][i + 1]) == {"type": "object"}
+
+
+def test_cli_uses_configured_effort(monkeypatch):
+    seen = {}
+
+    def fake_run(cmd, **kw):
+        seen["cmd"] = cmd
+        return subprocess.CompletedProcess(cmd, 0, json.dumps({"is_error": False, "result": "x"}), "")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    CliLLM(Settings(effort="medium")).complete("sys", [{"role": "user", "content": "hi"}])
+    i = seen["cmd"].index("--effort")
+    assert seen["cmd"][i + 1] == "medium"

@@ -23,9 +23,10 @@ class ApiLLM:
 
         self.client = anthropic.Anthropic(api_key=settings.anthropic_api_key or None)
         self.model = settings.model
+        self.effort = settings.effort
 
     def complete(self, system: str, messages: list[dict], schema: dict | None = None) -> str:
-        output_config: dict = {"effort": "low"}
+        output_config: dict = {"effort": self.effort}
         if schema:
             output_config["format"] = {"type": "json_schema", "schema": schema}
         response = self.client.messages.create(
@@ -42,6 +43,7 @@ class ApiLLM:
 class CliLLM:
     def __init__(self, settings: Settings, timeout: int = 300):
         self.model = settings.model
+        self.effort = settings.effort
         self.timeout = timeout
 
     @staticmethod
@@ -60,6 +62,7 @@ class CliLLM:
         cmd = [
             "claude", "-p",
             "--model", self.model,
+            "--effort", self.effort,
             "--system-prompt", system,
             "--output-format", "json",
             "--tools", "",

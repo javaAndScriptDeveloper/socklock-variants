@@ -14,6 +14,7 @@ class Settings:
     words_per_second: float = 2.5
     onscreen_max_words: int = 7
     default_hook_seconds: float = 2.5
+    effort: str = "low"  # low | medium | high — same value for API and `claude -p`
 
 
 def load_settings() -> Settings:
@@ -25,4 +26,5 @@ def load_settings() -> Settings:
         words_per_second=float(os.getenv("WORDS_PER_SECOND", "2.5")),
         onscreen_max_words=int(os.getenv("ONSCREEN_MAX_WORDS", "7")),
         default_hook_seconds=float(os.getenv("DEFAULT_HOOK_SECONDS", "2.5")),
+        effort=os.getenv("EFFORT", "low").strip().lower(),
     )
