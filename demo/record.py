@@ -268,6 +268,8 @@ def record_app(page):
     pause(1.6)
     # a real download pops Chrome's download bubble over the frame; show the file instead
     page.evaluate("document.getElementById('csv').addEventListener('click', (e) => e.preventDefault())")
+    page.locator("#csv").scroll_into_view_if_needed()
+    mark("s11_csv")
     cur.click(page.locator("#csv"), 1000)
     pause(0.8)
     page.evaluate("window.__csv()")

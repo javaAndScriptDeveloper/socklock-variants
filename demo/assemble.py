@@ -42,7 +42,8 @@ def parts_for(n: int, m: dict) -> tuple[Path, list[tuple[float, float, bool]]]:
         8: [(m["s07_end"], m["s09"], False)],
         9: [(m["s09"], m["s10"], False)],
         10: [(m["s10"], sent, False), (sent, m["s10_reply"], True), (m["s10_reply"], m["s11"], False)],
-        11: [(m["s11"], m["end"], False)],
+        # copy + toast, then skip the scroll back up to the CSV button
+        11: [(m["s11"] + 2.0, m["s11"] + 6.5, False), (m.get("s11_csv", m["s11"] + 10.0), m["end"], False)],
     }[n]
 
 
@@ -55,7 +56,8 @@ def render(n: int, m: dict) -> Path:
     elastic = sum(e - s for s, e, el in parts if el)
     speed_el = min(12.0, max(1.0, elastic / max(target - rigid, 1.0))) if elastic else 1.0
     total = rigid + elastic / speed_el
-    speed_all = total / target if 1.0 < total / target <= 1.35 else 1.0
+    cap = 1.35 if n in (1, 2, 3, 4, 12, 13) else 1.6  # UI clicks still read fine at 1.6x
+    speed_all = total / target if 1.0 < total / target <= cap else 1.0
     total /= speed_all
 
     chains, labels = [], []
