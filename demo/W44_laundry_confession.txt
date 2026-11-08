@@ -1,0 +1,10 @@
+W44 · Laundry confession (45s UGC)
+HOOK 0-3s | VO: "I owe my husband an apology about the socks" | ON-SCREEN: "Laundry confession"
+SETUP 3-8s | VO: "For six years I blamed him for every single sock that went missing"
+PROBLEM 8-14s | VO: "Turns out they were vanishing in the wash, sliding into the drum seal or stuck inside a fitted sheet" | ON-SCREEN: "The drum seal. Every time."
+COST 14-19s | VO: "I was buying a new multipack every two months and still had a drawer full of singles"
+DISCOVERY 19-24s | VO: "Then my sister sent me SockLock" | ON-SCREEN: "Tiny magnet. Big deal."
+DEMO 24-31s | VO: "There's a small magnet on each cuff, so you click the pair together before it goes in the wash" | ON-SCREEN: "Click. Wash. Still a pair."
+RESULT 31-36s | VO: "Three months later, every pair comes out together, and my husband is off the hook"
+OFFER 36-41s | VO: "Five pairs for twenty-nine dollars, and a fresh set arrives every quarter" | ON-SCREEN: "5 pairs for $29"
+CTA 41-45s | VO: "Tap the link and stop blaming your partner" | ON-SCREEN: "Shop SockLock"
