@@ -1,1 +1,68 @@
-<!doctype html><html><body>placeholder</body></html>
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SockLock Variants</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="intro">
+      <h1>Нові модифікації</h1>
+      <p>Встав скрипт переможця або перетягни файл — отримаєш варіанти хука, першої фрази й тексту на екрані під таймінг відео.</p>
+    </header>
+
+    <section class="glass input" aria-label="Скрипт переможця">
+      <label class="drop" id="drop">
+        <textarea id="script" spellcheck="false" placeholder='W12 · Washer thief
+HOOK 0-2.5s | VO: "Lost another sock?" | ON-SCREEN: "Your washer eats socks"
+PROBLEM 2.5-7s | VO: "Every wash, one goes missing..."
+PRODUCT 7-15s | VO: "SockLock magnets keep pairs together"
+CTA 15-20s | VO: "Get your first pack — 30% off"'></textarea>
+        <span class="hint">Перетягни .txt або .csv сюди, <button type="button" class="link" id="pick">обери файл</button> чи <button type="button" class="link" id="sample">встав приклад</button></span>
+        <input type="file" id="file" accept=".txt,.csv,.md,text/plain" hidden>
+      </label>
+      <div class="bar">
+        <div class="pill" role="group" aria-label="Кількість модифікацій">
+          <span>Модифікацій</span>
+          <button type="button" class="step" id="minus" aria-label="Менше">−</button>
+          <output id="count">20</output>
+          <button type="button" class="step" id="plus" aria-label="Більше">+</button>
+        </div>
+        <button type="button" class="btn" id="generate">Згенерувати</button>
+      </div>
+    </section>
+
+    <section class="glass results" id="results" hidden aria-live="polite">
+      <div class="rhead">
+        <h2 id="rtitle">Модифікації</h2>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="copyAll">Копіювати всі</button>
+          <a class="btn ghost" id="csv" href="/api/export.csv">Завантажити CSV</a>
+        </div>
+      </div>
+      <p class="notice" id="notice" hidden></p>
+      <ol class="rows" id="rows"></ol>
+    </section>
+  </main>
+
+  <aside class="glass sheet" id="sheet" hidden aria-label="Чат з модифікацією">
+    <div class="sheet-head">
+      <div>
+        <h3>Що поправити?</h3>
+        <div class="name" id="chatName"></div>
+      </div>
+      <button type="button" class="icon" id="closeChat" aria-label="Закрити чат">✕</button>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <form class="compose" id="compose">
+      <input id="msg" autocomplete="off" placeholder="Напр.: коротше, без слова magnet, більше гумору">
+      <button class="btn send" aria-label="Надіслати">↑</button>
+    </form>
+  </aside>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
