@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="uk" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SockLock Variants demo scenes</title>
+<style>
+:root {
+  --bg: #0d0e12; --ink: #f5f5f7; --muted: #b8b8bf; --hair: rgba(255,255,255,.1);
+  --glass: rgba(40,42,50,.55); --stroke: rgba(255,255,255,.1);
+  --accent: #2f8cff; --new: rgba(47,140,255,.32); --warn: #ff6b5e; --warn-bg: rgba(255,107,94,.18);
+  --ok: #3ddc97; --gold: #ffc400;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(1100px 700px at 8% -5%, #1b2a4d, transparent 60%),
+    radial-gradient(900px 600px at 100% 15%, #35204a, transparent 60%),
+    radial-gradient(900px 700px at 45% 105%, #12352c, transparent 60%),
+    var(--bg);
+}
+.scene { position: absolute; inset: 0; display: none; padding: 7vh 8vw; }
+.scene.on { display: flex; }
+.glass { background: var(--glass); border: 1px solid var(--stroke); border-radius: 22px;
+  backdrop-filter: blur(24px) saturate(160%); box-shadow: 0 24px 60px rgba(0,0,0,.35); }
+.fade { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.fade.in { opacity: 1; transform: none; }
+.muted { color: var(--muted); }
+
+/* 1 + 4 + 13: type-led */
+.center { flex-direction: column; justify-content: center; align-items: flex-start; }
+.big { font-size: clamp(44px, 6.2vw, 96px); line-height: 1.04; font-weight: 700; letter-spacing: -.035em; margin: 0; max-width: 15ch; }
+.big .strike { position: relative; color: var(--muted); }
+.big .strike::after { content: ""; position: absolute; left: 0; top: 54%; height: .08em; width: 0; background: var(--warn); transition: width .9s ease; }
+.big .strike.on::after { width: 100%; }
+.sub { font-size: clamp(20px, 2vw, 30px); color: var(--muted); margin: 28px 0 0; max-width: 40ch; line-height: 1.35; }
+
+/* 2: designer's day */
+.day { flex-direction: column; gap: 4vh; justify-content: center; }
+.day h2 { font-size: 40px; margin: 0; letter-spacing: -.02em; }
+.timeline { padding: 28px 32px; }
+.hours { display: grid; grid-template-columns: repeat(10, 1fr); color: var(--muted); font: 15px var(--mono); margin-bottom: 12px; }
+.track { position: relative; height: 64px; border-radius: 14px; background: rgba(255,255,255,.06); overflow: hidden; }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #ff6b5e, #ff9f6b);
+  display: flex; align-items: center; padding-left: 20px; font-weight: 650; font-size: 20px; white-space: nowrap; color: #2a0d08; }
+.flabel { position: absolute; left: 20px; top: 0; bottom: 0; display: flex; align-items: center; font-weight: 650; font-size: 20px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.45); }
+.rest { position: absolute; left: 50%; right: 0; top: 0; bottom: 0; display: flex; align-items: center; padding-left: 20px;
+  color: var(--muted); font-size: 18px; border-left: 2px dashed var(--hair); opacity: 0; transition: opacity .6s; }
+.clock { font: 700 64px var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.work { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; }
+.script { padding: 26px 30px; font: 19px/1.7 var(--mono); }
+.script .seg { color: var(--muted); }
+.script .hook { background: var(--warn-bg); border-radius: 6px; padding: 1px 6px; }
+.caret { display: inline-block; width: 2px; height: 1.1em; background: var(--ink); vertical-align: -3px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.counter { padding: 26px 30px; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+.counter .n { font: 700 72px var(--sans); font-variant-numeric: tabular-nums; }
+.counter .l { font-size: 20px; color: var(--muted); }
+.checks { display: flex; gap: 10px; flex-wrap: wrap; }
+.chip { font-size: 15px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.08); }
+
+/* 3: capacity */
+.cap { flex-direction: column; justify-content: center; gap: 5vh; }
+.mods { display: flex; align-items: baseline; gap: 36px; }
+.mods .n { font: 800 128px/1 var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.mods .need { color: var(--warn); }
+.mods .l { font-size: 22px; color: var(--muted); display: block; margin-top: 8px; }
+.arrow { font-size: 64px; color: var(--muted); }
+.bars { padding: 28px 32px; display: grid; gap: 18px; }
+.bar { display: grid; grid-template-columns: 250px 1fr 140px; align-items: center; gap: 20px; font-size: 19px; }
+.bar .t { position: relative; height: 34px; border-radius: 10px; background: rgba(255,255,255,.05); }
+.bar .v { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 10px; transition: width 1.4s cubic-bezier(.2,.7,.2,1); background: var(--accent); }
+.bar .v.over { background: linear-gradient(90deg, var(--accent) 0 var(--norm), var(--warn) var(--norm)); }
+.bar .num { font: 650 22px var(--sans); font-variant-numeric: tabular-nums; text-align: right; }
+.norm { position: absolute; top: -10px; bottom: -10px; width: 2px; background: var(--ink); left: 50.9%; }
+.norm::after { content: "норма 1008 год"; position: absolute; top: -26px; left: -60px; width: 140px; text-align: center; font-size: 14px; color: var(--muted); }
+.legend { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 16px; padding-left: 270px; }
+.sw { width: 14px; height: 14px; border-radius: 4px; display: inline-block; margin-left: 14px; }
+.verdict { font-size: 34px; font-weight: 650; letter-spacing: -.02em; }
+.verdict b { color: var(--warn); }
+
+/* 4: product */
+.brand { display: flex; align-items: center; gap: 22px; margin-bottom: 26px; }
+.logo { width: 84px; height: 84px; border-radius: 22px; background: linear-gradient(140deg, #2f8cff, #7b5cff);
+  display: grid; place-items: center; box-shadow: 0 18px 40px rgba(47,140,255,.35); }
+.logo svg { width: 48px; height: 48px; }
+
+/* 12: impact */
+.impact { flex-direction: column; justify-content: center; gap: 4vh; }
+.rows { display: grid; gap: 14px; }
+.ba { display: grid; grid-template-columns: 380px 170px 60px 170px; align-items: baseline; gap: 18px; padding: 18px 28px; font-size: 22px; }
+.ba .was { font: 600 34px var(--sans); font-variant-numeric: tabular-nums; color: var(--muted); text-decoration: line-through; text-decoration-color: var(--warn); }
+.ba .now { font: 750 42px var(--sans); font-variant-numeric: tabular-nums; color: var(--ok); }
+.ba .ar { color: var(--muted); font-size: 30px; }
+.egp { display: flex; align-items: baseline; gap: 26px; }
+.egp .n { font: 800 110px/1 var(--sans); letter-spacing: -.045em; color: var(--ok); }
+.egp .l { font-size: 26px; color: var(--muted); max-width: 32ch; }
+.facts { display: flex; gap: 14px; flex-wrap: wrap; }
+.facts .chip { font-size: 19px; padding: 10px 18px; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="scene center" data-s="1">
+  <h1 class="big fade" id="s1a">Половина твого дня — <span class="strike" id="s1s">нові ідеї</span></h1>
+  <p class="sub fade" id="s1b">Насправді — переписування одного й того ж скрипту переможця.</p>
+</section>
+
+<!-- 2 -->
+<section class="scene day" data-s="2">
+  <h2 class="fade" id="s2h">Робочий день motion-дизайнера</h2>
+  <div class="glass timeline fade" id="s2t">
+    <div class="hours"><span>09</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span></div>
+    <div class="track">
+      <div class="fill" id="s2f"></div>
+      <div class="flabel">Переписую хуки, перші фрази, текст на екрані</div>
+      <div class="rest" id="s2r">Монтаж — коли залишиться час</div>
+    </div>
+  </div>
+  <div class="work fade" id="s2w">
+    <div class="glass script">
+      <div><span class="seg">HOOK 0–2.5s</span> VO: "<span class="hook" id="s2hook"></span><span class="caret"></span>"</div>
+      <div><span class="seg">PROBLEM 2.5–7s</span> VO: "Every wash, one goes missing"</div>
+      <div><span class="seg">PRODUCT 7–15s</span> VO: "Tiny magnets click pairs together"</div>
+      <div><span class="seg">CTA 15–20s</span> VO: "5 pairs for $29"</div>
+    </div>
+    <div class="glass counter">
+      <div class="n" id="s2n">1 / 20</div>
+      <div class="l">варіант хука для однієї модифікації</div>
+      <div class="checks">
+        <span class="chip" id="s2c1">влазить у 2,5 с?</span>
+        <span class="chip" id="s2c2">не повтор?</span>
+        <span class="chip" id="s2c3">без зайвих обіцянок?</span>
+      </div>
+      <div class="clock" id="s2clock">09:00</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="scene cap" data-s="3">
+  <div class="mods fade" id="s3m">
+    <div><span class="n" id="s3now">0</span><span class="l">модифікацій на місяць зараз</span></div>
+    <div class="arrow">→</div>
+    <div><span class="n need" id="s3need">0</span><span class="l">потрібно для $800k spend</span></div>
+  </div>
+  <div class="glass bars fade" id="s3b">
+    <div class="bar"><span>Години команди, норма</span><div class="t"><div class="v" data-w="50.9"></div></div><span class="num">1008</span></div>
+    <div class="bar"><span>Зараз, 240 модифікацій</span><div class="t"><div class="v over" style="--norm:84.0%" data-w="60.6"></div></div><span class="num">1200</span></div>
+    <div class="bar"><span>Ціль, 500 вручну</span><div class="t"><div class="v over" style="--norm:51.0%" data-w="100"></div></div><span class="num">1980</span></div>
+    <div class="legend"><span class="sw" style="background:var(--accent)"></span>у межах норми <span class="sw" style="background:var(--warn)"></span>понад норму</div>
+  </div>
+  <div class="verdict fade" id="s3v">Вже +19% овертайму. Вручну — це <b>ще 4–6 дизайнерів</b>.</div>
+</section>
+
+<!-- 4 -->
+<section class="scene center" data-s="4">
+  <div class="brand fade" id="s4a">
+    <div class="logo"><svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 14h20M10 24h28M10 34h14"/><path d="M33 31l4 4 7-9"/></svg></div>
+    <div style="font-size:30px;font-weight:650;letter-spacing:-.02em">SockLock Variants</div>
+  </div>
+  <h1 class="big fade" id="s4b">Встав переможця. Отримай 20 варіантів.</h1>
+  <p class="sub fade" id="s4c">Хуки, перші фрази й текст на екрані — під таймінг відео, вже перевірені.</p>
+</section>
+
+<!-- 12 -->
+<section class="scene impact" data-s="12">
+  <div class="rows">
+    <div class="glass ba fade"><span>Текст однієї модифікації</span><span class="was">90 хв</span><span class="ar">→</span><span class="now">10 хв</span></div>
+    <div class="glass ba fade"><span>Вся модифікація</span><span class="was">3 год</span><span class="ar">→</span><span class="now">1,7 год</span></div>
+    <div class="glass ba fade"><span>Модифікацій на місяць</span><span class="was">240</span><span class="ar">→</span><span class="now">430</span></div>
+  </div>
+  <div class="egp fade" id="s12e"><span class="n" id="s12n">+$0k</span><span class="l">EGP на місяць тими самими 6 дизайнерами</span></div>
+  <div class="facts fade" id="s12f">
+    <span class="chip">до $100 на місяць за токени</span>
+    <span class="chip">якість 4,0 з 5 на 180 варіантах</span>
+    <span class="chip">0 ризикових обіцянок</span>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="scene center" data-s="13">
+  <h1 class="big fade" id="s13a">Пілот: 2 тижні, 2 дизайнери.</h1>
+  <p class="sub fade" id="s13b">Відкрий SockLock Variants і встав свого переможця.</p>
+</section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const show = (el) => el.classList.add("in");
+const s = new URLSearchParams(location.search).get("s") || "1";
+document.querySelector(`[data-s="${s}"]`).classList.add("on");
+
+function countTo(el, to, ms, fmt = (v) => String(v)) {
+  const t0 = performance.now();
+  return new Promise((done) => {
+    (function tick(t) {
+      const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(Math.round(to * e));
+      k < 1 ? requestAnimationFrame(tick) : done();
+    })(t0);
+  });
+}
+
+async function type(el, text, ms = 55) { for (const ch of text) { el.textContent += ch; await wait(ms); } }
+async function erase(el, ms = 22) { while (el.textContent) { el.textContent = el.textContent.slice(0, -1); await wait(ms); } }
+
+const scenes = {
+  async 1() {
+    await wait(400); show($("s1a"));
+    await wait(1900); $("s1s").classList.add("on");
+    await wait(1100); show($("s1b"));
+  },
+  async 2() {
+    await wait(300); show($("s2h")); await wait(400); show($("s2t")); await wait(400); show($("s2w"));
+    const fill = $("s2f"), clock = $("s2clock"), n = $("s2n"), hook = $("s2hook");
+    const hooks = ["Lost another sock?", "Your washer is a sock thief", "Where do socks even go?", "6 years of single socks"];
+    const total = 15500, t0 = performance.now();
+    (function grow(t) {
+      const k = Math.min(1, (t - t0) / total);
+      fill.style.width = (k * 50) + "%";
+      const mins = Math.round(k * 270), h = 9 + Math.floor(mins / 60), m = mins % 60;
+      clock.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+      if (k < 1) requestAnimationFrame(grow);
+    })(t0);
+    let i = 0;
+    for (const v of [1, 2, 3, 4, 7, 11, 15, 19, 20]) {
+      n.textContent = `${v} / 20`;
+      if (i < hooks.length) {
+        await type(hook, hooks[i]);
+        for (const c of ["s2c1", "s2c2", "s2c3"]) { $(c).style.background = "rgba(255,255,255,.18)"; await wait(160); $(c).style.background = ""; }
+        await wait(250); await erase(hook);
+      } else {
+        await type(hook, hooks[i % hooks.length].slice(0, 10), 30); await erase(hook, 12);
+      }
+      i++;
+    }
+    await type(hook, "Lost another sock?");
+    $("s2r").style.opacity = 1;
+  },
+  async 3() {
+    await wait(300); show($("s3m"));
+    await countTo($("s3now"), 240, 1400);
+    await wait(300); await countTo($("s3need"), 500, 1400);
+    await wait(700); show($("s3b"));
+    await wait(500);
+    for (const v of document.querySelectorAll(".bar .v")) { v.style.width = v.dataset.w + "%"; await wait(900); }
+    await wait(1200); show($("s3v"));
+  },
+  async 4() {
+    await wait(300); show($("s4a")); await wait(900); show($("s4b")); await wait(1400); show($("s4c"));
+  },
+  async 12() {
+    await wait(300);
+    for (const r of document.querySelectorAll(".ba")) { show(r); await wait(1500); }
+    await wait(500); show($("s12e"));
+    await countTo($("s12n"), 67, 1600, (v) => `+$${v}k`);
+    await wait(900); show($("s12f"));
+  },
+  async 13() {
+    await wait(300); show($("s13a")); await wait(1200); show($("s13b"));
+  },
+};
+const run = () => scenes[s]().then(() => { document.body.dataset.done = "1"; });
+if (new URLSearchParams(location.search).has("manual")) window.__start = run; else run();
+</script>
+</body>
+</html>

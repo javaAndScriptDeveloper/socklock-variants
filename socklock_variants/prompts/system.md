@@ -47,4 +47,4 @@ Answer with JSON only, no prose, in this shape:
 
 When asked to revise one variant in a chat, answer with JSON only:
 
-{"reply": "<one short sentence to the designer>", "variant": {<one variant in the same shape>}}
+{"reply": "<one short sentence to the designer, in the language of their comment>", "variant": {<one variant in the same shape>}}
