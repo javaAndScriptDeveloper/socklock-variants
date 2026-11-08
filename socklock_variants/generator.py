@@ -1,6 +1,7 @@
 """Script -> variants: prompt the model, parse JSON, check, regenerate failures once, name."""
 
 import json
+import logging
 from pathlib import Path
 
 from .checks import check_diversity, check_variant
@@ -9,6 +10,49 @@ from .llm import LLM
 from .models import ELEMENTS, Variant
 from .naming import make_name, revision_name
 from .script import Script
+
+log = logging.getLogger(__name__)
+
+# Structured output: the model is constrained to this shape, so answers always parse.
+_ADJACENT = {
+    "anyOf": [
+        {"type": "null"},
+        {
+            "type": "object",
+            "properties": {
+                "segment": {"type": "string"},
+                "field": {"type": "string", "enum": ["vo", "onscreen"]},
+                "text": {"type": "string"},
+            },
+            "required": ["segment", "field", "text"],
+            "additionalProperties": False,
+        },
+    ]
+}
+_VARIANT = {
+    "type": "object",
+    "properties": {
+        "element": {"type": "string", "enum": list(ELEMENTS)},
+        "angle": {"type": "string"},
+        "text": {"type": "string"},
+        "adjacent": _ADJACENT,
+        "why": {"type": "string"},
+    },
+    "required": ["element", "angle", "text", "adjacent", "why"],
+    "additionalProperties": False,
+}
+VARIANTS_SCHEMA = {
+    "type": "object",
+    "properties": {"variants": {"type": "array", "items": _VARIANT}},
+    "required": ["variants"],
+    "additionalProperties": False,
+}
+REVISION_SCHEMA = {
+    "type": "object",
+    "properties": {"reply": {"type": "string"}, "variant": _VARIANT},
+    "required": ["reply", "variant"],
+    "additionalProperties": False,
+}
 
 SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "system.md").read_text(encoding="utf-8")
 
@@ -50,6 +94,9 @@ def _parse_variants(answer: str) -> list[Variant]:
     try:
         items = extract_json(answer).get("variants", [])
     except ValueError:
+        items = []
+    if not items:
+        log.warning("no variants parsed from model answer (%d chars): %r", len(answer), answer[:500])
         return []
     return [v for v in (_to_variant(i) for i in items if isinstance(items, list)) if v]
 
@@ -70,7 +117,7 @@ def generate(script: Script, count: int, llm: LLM, settings: Settings) -> list[V
         f"Write {count} variants. JSON only."
     )
     messages = [{"role": "user", "content": request}]
-    answer = llm.complete(SYSTEM_PROMPT, messages)
+    answer = llm.complete(SYSTEM_PROMPT, messages, schema=VARIANTS_SCHEMA)
     variants = _parse_variants(answer)[:count]
     _check_all(variants, script, settings)
 
@@ -91,7 +138,7 @@ def generate(script: Script, count: int, llm: LLM, settings: Settings) -> list[V
         lines.append("Timing: voice-over 2.5 words per second; on-screen max 7 words. No risky claims.")
         messages += [{"role": "assistant", "content": answer}, {"role": "user", "content": "\n".join(lines)}]
 
-        fresh = _parse_variants(llm.complete(SYSTEM_PROMPT, messages))
+        fresh = _parse_variants(llm.complete(SYSTEM_PROMPT, messages, schema=VARIANTS_SCHEMA))
         for i in failing:
             if fresh:
                 variants[i] = fresh.pop(0)
@@ -124,7 +171,7 @@ def revise(
     else:
         content = f"Designer's comment: {comment}\n\nRevise the latest version. JSON only."
     messages = history + [{"role": "user", "content": content}]
-    answer = llm.complete(SYSTEM_PROMPT, messages)
+    answer = llm.complete(SYSTEM_PROMPT, messages, schema=REVISION_SCHEMA)
 
     try:
         data = extract_json(answer)

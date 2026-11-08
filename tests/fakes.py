@@ -8,8 +8,8 @@ class FakeLLM:
         self.responses = list(responses)
         self.calls = []
 
-    def complete(self, system, messages):
-        self.calls.append({"system": system, "messages": [dict(m) for m in messages]})
+    def complete(self, system, messages, schema=None):
+        self.calls.append({"system": system, "messages": [dict(m) for m in messages], "schema": schema})
         if not self.responses:
             raise AssertionError("FakeLLM ran out of responses")
         return self.responses.pop(0)

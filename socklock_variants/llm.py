@@ -14,7 +14,7 @@ from .config import Settings
 
 
 class LLM(Protocol):
-    def complete(self, system: str, messages: list[dict]) -> str: ...
+    def complete(self, system: str, messages: list[dict], schema: dict | None = None) -> str: ...
 
 
 class ApiLLM:
@@ -24,14 +24,17 @@ class ApiLLM:
         self.client = anthropic.Anthropic(api_key=settings.anthropic_api_key or None)
         self.model = settings.model
 
-    def complete(self, system: str, messages: list[dict]) -> str:
+    def complete(self, system: str, messages: list[dict], schema: dict | None = None) -> str:
+        output_config: dict = {"effort": "low"}
+        if schema:
+            output_config["format"] = {"type": "json_schema", "schema": schema}
         response = self.client.messages.create(
             model=self.model,
             max_tokens=8000,
             # The system prompt is identical for every call: cache it.
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
-            output_config={"effort": "low"},
+            output_config=output_config,
         )
         return "".join(b.text for b in response.content if b.type == "text")
 
@@ -53,7 +56,7 @@ class CliLLM:
         parts.append(f"Now answer this latest message:\n{messages[-1]['content']}")
         return "\n\n".join(parts)
 
-    def complete(self, system: str, messages: list[dict]) -> str:
+    def complete(self, system: str, messages: list[dict], schema: dict | None = None) -> str:
         cmd = [
             "claude", "-p",
             "--model", self.model,
@@ -63,6 +66,8 @@ class CliLLM:
             "--no-session-persistence",
             "--strict-mcp-config",
         ]
+        if schema:
+            cmd += ["--json-schema", json.dumps(schema)]
         proc = subprocess.run(
             cmd, input=self.transcript(messages), capture_output=True, text=True, timeout=self.timeout
         )
@@ -71,6 +76,8 @@ class CliLLM:
         data = json.loads(proc.stdout)
         if data.get("is_error"):
             raise RuntimeError(f"claude -p error: {data.get('result')}")
+        if data.get("structured_output") is not None:
+            return json.dumps(data["structured_output"])
         return data["result"]
 
 

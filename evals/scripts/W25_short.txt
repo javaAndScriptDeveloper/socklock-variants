@@ -1,0 +1,4 @@
+W25 · 12-second cut
+HOOK 0-1.5s | VO: "Sock gone?" | ON-SCREEN: "Again?"
+PRODUCT 1.5-8s | VO: "Magnets keep pairs together in the wash"
+CTA 8-12s | VO: "Five pairs, twenty-nine dollars"

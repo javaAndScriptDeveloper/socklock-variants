@@ -1,0 +1,5 @@
+W21 · Silent text-only
+HOOK 0-2s | ON-SCREEN: "POV: you open the dryer"
+PROBLEM 2-5s | ON-SCREEN: "and one sock is gone. Again."
+PRODUCT 5-11s | ON-SCREEN: "Magnetic cuffs keep every pair together"
+CTA 11-15s | ON-SCREEN: "5 pairs for $29"

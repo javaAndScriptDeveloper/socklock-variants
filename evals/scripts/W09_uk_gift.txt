@@ -1,0 +1,5 @@
+W09 · Gift idea (UK)
+HOOK 0-2.5s | VO: "Stuck for a gift?" | ON-SCREEN: "Gift they'll actually use"
+PROBLEM 2.5-6s | VO: "Everyone's got a pile of odd socks in the cupboard"
+PRODUCT 6-13s | VO: "SockLock pairs click together, so they come out of the wash as pairs"
+CTA 13-18s | VO: "Five pairs for twenty-nine dollars, delivered every quarter"

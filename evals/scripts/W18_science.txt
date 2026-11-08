@@ -1,0 +1,5 @@
+W18 · Where socks go
+HOOK 0-2.5s | VO: "Where do socks actually go?" | ON-SCREEN: "The sock mystery"
+PROBLEM 2.5-8s | VO: "They slip into the drum seal or cling inside a sleeve"
+PRODUCT 8-15s | VO: "A magnet on each cuff keeps them locked as one"
+CTA 15-20s | VO: "Stop feeding your washer. Get SockLock."

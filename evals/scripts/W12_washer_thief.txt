@@ -1,0 +1,5 @@
+W12 · Washer thief
+HOOK 0-2.5s | VO: "Lost another sock?" | ON-SCREEN: "Your washer eats socks"
+PROBLEM 2.5-7s | VO: "Every wash, one goes missing and you never find it"
+PRODUCT 7-15s | VO: "SockLock socks have tiny magnets that click pairs together" | ON-SCREEN: "Click. Wash. Still a pair."
+CTA 15-20s | VO: "Get your first 5 pairs for $29" | ON-SCREEN: "5 pairs for $29"

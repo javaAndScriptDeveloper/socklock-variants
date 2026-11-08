@@ -96,7 +96,7 @@ def test_bad_input():
 
 def test_llm_failure_is_502():
     class Boom:
-        def complete(self, system, messages):
+        def complete(self, system, messages, schema=None):
             raise RuntimeError("claude -p failed: not logged in")
 
     c = TestClient(create_app(llm=Boom(), settings=Settings()))
