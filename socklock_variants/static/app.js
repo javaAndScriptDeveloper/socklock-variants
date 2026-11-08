@@ -111,16 +111,17 @@ function fullView(v) {
     line.append(el("span", "seg", `${s.name}${timing}  `));
     [["vo", "VO"], ["onscreen", "ON-SCREEN"]].forEach(([f, label]) => {
       if (!s[f]) return;
-      line.append(document.createTextNode(` ${label}: `));
+      line.append(el("span", "field", ` ${label}: `));
       const h = s[`highlight_${f}`];
       line.append(h ? el("mark", h, s[f]) : document.createTextNode(s[f]));
     });
     box.append(line);
   });
   const legend = el("div", "legend");
-  legend.innerHTML = '<mark class="new">нове</mark> &nbsp; <mark class="adjacent">підлаштована сусідня фраза</mark>';
+  legend.append(el("mark", "new", "нове"));
+  if (v.adjacent) { legend.append(document.createTextNode("  ")); legend.append(el("mark", "adjacent", "підлаштована сусідня фраза")); }
   box.append(legend);
-  if (v.why) box.append(el("div", "legend", `Що тестує: ${v.why}`));
+  if (v.why) box.append(el("div", "legend", `Що перевіряє цей варіант: ${v.why}`));
   return box;
 }
 

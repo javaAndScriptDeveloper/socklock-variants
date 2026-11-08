@@ -14,6 +14,9 @@
   --new: rgba(0, 113, 227, .16);
   --adjacent: rgba(255, 196, 0, .32);
   --shadow: 0 10px 40px rgba(40, 52, 120, .12);
+  --well: rgba(255, 255, 255, .45);
+  --link-bg: rgba(0, 113, 227, .1);
+  --link: #0062c4;
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --a-pain: rgba(255, 69, 58, .16);
@@ -37,9 +40,14 @@
     --stroke: rgba(255, 255, 255, .1);
     --hair: rgba(255, 255, 255, .1);
     --ink: #f5f5f7;
-    --muted: #a1a1a6;
+    --muted: #b8b8bf;
     --accent: #2f8cff;
     --shadow: 0 10px 40px rgba(0, 0, 0, .4);
+    --well: rgba(0, 0, 0, .32);
+    --link-bg: rgba(47, 140, 255, .18);
+    --link: #8cc0ff;
+    --new: rgba(47, 140, 255, .32);
+    --adjacent: rgba(255, 196, 0, .3);
   }
 }
 
@@ -81,7 +89,7 @@ body.chat-open .wrap { margin-right: max(16px, calc(400px + 24px)); margin-left:
   border: 1.5px dashed var(--hair);
   border-radius: 16px;
   padding: 14px 16px 12px;
-  background: rgba(255, 255, 255, .25);
+  background: var(--well);
   transition: border-color .2s, background .2s;
 }
 .drop.over { border-color: var(--accent); background: var(--new); }
@@ -95,9 +103,13 @@ body.chat-open .wrap { margin-right: max(16px, calc(400px + 24px)); margin-left:
   font: 13px/1.6 var(--mono);
   outline: none;
 }
-.drop textarea::placeholder { color: var(--muted); opacity: .7; }
-.hint { display: block; font-size: 13px; color: var(--muted); margin-top: 6px; }
-.link { border: 0; background: none; color: var(--accent); font: inherit; padding: 0; cursor: pointer; }
+.drop textarea::placeholder { color: var(--muted); opacity: .8; }
+.hint { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 10px; }
+.link {
+  border: 0; border-radius: 999px; padding: 5px 12px; cursor: pointer;
+  background: var(--link-bg); color: var(--link); font: 600 13px var(--sans);
+}
+.link:hover { filter: brightness(1.15); }
 
 .bar { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
 .pill {
@@ -155,14 +167,16 @@ body.chat-open .wrap { margin-right: max(16px, calc(400px + 24px)); margin-left:
 
 .full {
   grid-column: 1 / -1; margin-top: 10px;
-  background: rgba(255, 255, 255, .35); border-radius: 14px; padding: 12px 14px;
-  font: 13px/1.7 var(--mono); overflow-x: auto;
+  background: var(--well); border-radius: 14px; padding: 12px 14px;
+  font: 13px/1.7 var(--mono); color: var(--ink);
 }
-.full div { white-space: pre-wrap; }
-.full .seg { color: var(--muted); }
+.full div { white-space: pre-wrap; overflow-wrap: anywhere; }
+.full .seg { color: var(--muted); font-weight: 600; }
+.full .field { color: var(--muted); }
 mark.new { background: var(--new); color: inherit; border-radius: 4px; padding: 0 3px; }
 mark.adjacent { background: var(--adjacent); color: inherit; border-radius: 4px; padding: 0 3px; }
-.legend { margin-top: 8px; font-family: var(--sans); font-size: 12px; color: var(--muted); }
+.legend { margin-top: 10px; font-family: var(--sans); font-size: 13px; color: var(--muted); }
+.legend mark { color: var(--ink); }
 
 .skeleton { height: 64px; border-radius: 16px; margin: 6px 0;
   background: linear-gradient(90deg, var(--hair), var(--glass-strong), var(--hair));
@@ -170,13 +184,13 @@ mark.adjacent { background: var(--adjacent); color: inherit; border-radius: 4px;
 @keyframes shimmer { to { background-position: -200% 0; } }
 
 .sheet {
-  position: fixed; right: 24px; top: 24px; bottom: 24px; width: 380px;
+  position: fixed; right: 24px; top: 24px; bottom: 24px; width: min(380px, calc(100vw - 48px));
   display: flex; flex-direction: column; padding: 18px; z-index: 5;
 }
 .sheet-head { display: flex; justify-content: space-between; align-items: start; gap: 8px; margin-bottom: 12px; }
 .sheet h3 { margin: 0 0 2px; font-size: 17px; }
-.msgs { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px; }
-.me, .ai { padding: 9px 13px; max-width: 88%; font-size: 14px; }
+.msgs { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px; }
+.me, .ai { padding: 9px 13px; max-width: 88%; font-size: 14px; overflow-wrap: anywhere; }
 .me { align-self: flex-end; background: var(--accent); color: #fff; border-radius: 18px 18px 4px 18px; }
 .ai { align-self: flex-start; background: var(--glass-strong); border: 1px solid var(--stroke); border-radius: 18px 18px 18px 4px; }
 .ai .meta { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }

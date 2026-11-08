@@ -2,6 +2,7 @@
 
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from .checks import check_diversity, check_variant
@@ -111,39 +112,82 @@ def _check_all(variants: list[Variant], script: Script, settings: Settings) -> N
         v.issues += check_diversity(variants)[v.name]
 
 
-def generate(script: Script, count: int, llm: LLM, settings: Settings) -> list[Variant]:
+CHUNK_SIZE = 5  # variants per parallel call
+STRONG_ANGLES = ["pain", "number", "demo", "humor", "curiosity", "question"]
+WEAK_ANGLES = ["contrarian", "social_proof"]  # hard in a few seconds: at most once per batch
+ELEMENT_CYCLE = ["HOOK", "HOOK", "FIRSTLINE", "ONSCREEN"]  # 50% / 25% / 25%
+
+
+def plan_slots(count: int) -> list[tuple[str, str]]:
+    """Decide up front which element and angle each variant gets.
+
+    Diversity is guaranteed by code, which also lets the batch be split into
+    independent parallel calls without them repeating each other's angles.
+    """
+    angles: list[str] = []
+    strong = 0
+    for i in range(count):
+        if count >= 8 and i in (6, 7):
+            angles.append(WEAK_ANGLES[i - 6])
+        else:
+            angles.append(STRONG_ANGLES[strong % len(STRONG_ANGLES)])
+            strong += 1
+    return [(ELEMENT_CYCLE[i % len(ELEMENT_CYCLE)], a) for i, a in enumerate(angles)]
+
+
+def _slot_lines(slots: list[tuple[int, str, str]]) -> str:
+    return "\n".join(f"{n}. {e} — {a}" for n, e, a in slots)
+
+
+def _write_chunk(script: Script, slots: list[tuple[int, str, str]], llm: LLM) -> list[Variant]:
     request = (
         f"Winning script:\n\n{script.to_text()}\n\n"
-        f"Write {count} variants. JSON only."
+        f"Write exactly {len(slots)} variants, one per line of this plan, in this order "
+        f"(element — angle):\n{_slot_lines(slots)}\n\nJSON only."
     )
-    messages = [{"role": "user", "content": request}]
-    answer = llm.complete(SYSTEM_PROMPT, messages, schema=VARIANTS_SCHEMA)
-    variants = _parse_variants(answer)[:count]
-    _check_all(variants, script, settings)
+    answer = llm.complete(SYSTEM_PROMPT, [{"role": "user", "content": request}], schema=VARIANTS_SCHEMA)
+    return _parse_variants(answer)[: len(slots)]
 
-    failing = [i for i, v in enumerate(variants) if v.issues]
-    missing = count - len(variants)
-    if failing or missing:
+
+def generate(script: Script, count: int, llm: LLM, settings: Settings) -> list[Variant]:
+    plan = plan_slots(count)
+    numbered = [(i + 1, e, a) for i, (e, a) in enumerate(plan)]
+    chunks = [numbered[i:i + CHUNK_SIZE] for i in range(0, count, CHUNK_SIZE)]
+
+    slots: list[Variant | None] = [None] * count
+    with ThreadPoolExecutor(max_workers=len(chunks)) as pool:
+        for chunk, got in zip(chunks, pool.map(lambda c: _write_chunk(script, c, llm), chunks)):
+            for (n, _, _), v in zip(chunk, got):
+                slots[n - 1] = v
+
+    present = [v for v in slots if v]
+    _check_all(present, script, settings)
+    redo = [i for i, v in enumerate(slots) if v is None or v.issues]
+    if redo:
+        # One follow-up call for everything that failed or is missing, aware of the rest.
+        keep = "\n".join(f"- {v.text}" for v in slots if v and not v.issues)
         lines = []
-        if not variants:
-            lines.append("Your answer could not be parsed as the JSON shape asked for.")
-        for i in failing:
-            lines.append(f"#{i + 1} \"{variants[i].text}\" failed: {', '.join(variants[i].issues)}")
-        ask = []
-        if failing:
-            ask.append(f"replacements for {', '.join(f'#{i + 1}' for i in failing)} in that order")
-        if missing:
-            ask.append(f"{missing} more new variants")
-        lines.append("Write " + " and ".join(ask) + ". Same JSON shape, only the new variants.")
-        lines.append("Timing: voice-over 2.5 words per second; on-screen max 7 words. No risky claims.")
-        messages += [{"role": "assistant", "content": answer}, {"role": "user", "content": "\n".join(lines)}]
-
-        fresh = _parse_variants(llm.complete(SYSTEM_PROMPT, messages, schema=VARIANTS_SCHEMA))
-        for i in failing:
+        for i in redo:
+            e, a = plan[i]
+            why = f"failed: {', '.join(slots[i].issues)} (\"{slots[i].text}\")" if slots[i] else "missing"
+            lines.append(f"#{i + 1} {e} — {a}: {why}")
+        missing = sum(slots[i] is None for i in redo)
+        request = (
+            f"Winning script:\n\n{script.to_text()}\n\n"
+            + (f"Already accepted (do not repeat their openings or ideas):\n{keep}\n\n" if keep else "")
+            + "These slots need a new variant:\n" + "\n".join(lines) + "\n\n"
+            + (f"That is {len(redo) - missing} replacement(s) and {missing} more new variant(s). " if missing
+               else "")
+            + f"Write exactly {len(redo)} variants in the order listed. "
+            "Timing: voice-over 2.5 words per second; on-screen max 7 words. No risky claims. JSON only."
+        )
+        answer = llm.complete(SYSTEM_PROMPT, [{"role": "user", "content": request}], schema=VARIANTS_SCHEMA)
+        fresh = _parse_variants(answer)
+        for i in redo:
             if fresh:
-                variants[i] = fresh.pop(0)
-        variants += fresh[:missing]
+                slots[i] = fresh.pop(0)
 
+    variants = [v for v in slots if v]
     for v in variants:
         v.name = ""
     _check_all(variants, script, settings)

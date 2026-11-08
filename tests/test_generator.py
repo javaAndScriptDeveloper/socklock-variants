@@ -81,3 +81,43 @@ def test_revise_returns_revision_and_extends_history():
     assert new.issues == []
     assert [m["role"] for m in history] == ["user", "assistant"]
     assert "remove guaranteed" in llm.calls[0]["messages"][-1]["content"]
+
+
+def test_plan_slots_mix_and_weak_angles_once():
+    from socklock_variants.generator import plan_slots
+
+    plan = plan_slots(20)
+    assert len(plan) == 20
+    elements = [e for e, _ in plan]
+    assert elements.count("HOOK") == 10 and elements.count("FIRSTLINE") == 5 and elements.count("ONSCREEN") == 5
+    angles = [a for _, a in plan]
+    assert angles.count("contrarian") == 1 and angles.count("social_proof") == 1
+    assert len(set(angles)) == 8
+    assert "contrarian" not in [a for _, a in plan_slots(5)]
+
+
+class SlotEchoLLM:
+    """Thread-safe fake: answers each chunk with one valid variant per requested slot."""
+
+    def __init__(self):
+        import threading
+        self.calls = []
+        self.lock = threading.Lock()
+
+    def complete(self, system, messages, schema=None):
+        import re
+        with self.lock:
+            self.calls.append(messages[-1]["content"])
+        slots = re.findall(r"^\d+\. (\w+) — (\w+)$", messages[-1]["content"], re.M)
+        return json.dumps({"variants": [
+            {"element": e, "angle": a, "text": __import__("secrets").token_hex(8), "adjacent": None, "why": ""}
+            for i, (e, a) in enumerate(slots)]})
+
+
+def test_generate_runs_chunks_of_five_in_parallel():
+    llm = SlotEchoLLM()
+    out = generate(SCRIPT, 12, llm, S)
+    assert len(llm.calls) == 3  # 5 + 5 + 2
+    assert len(out) == 12
+    assert [v.angle for v in out] == [a for _, a in __import__("socklock_variants.generator", fromlist=["x"]).plan_slots(12)]
+    assert out[0].name.endswith("_v01") and out[11].name.endswith("_v12")
